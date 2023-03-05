@@ -2,7 +2,7 @@ include config.mk
 include lib/libs.mk
 all: out/libshttp2.so
 
-out/libshttp2.so: out obj/lib.c.o
+out/libshttp2.so: out obj/iobuffer.c.o
 	if [ -n '$(wildcard obj/*.cpp.o)' ]; then $(CXX) -shared $(LDFLAGS) -o'out/libshttp2.so' $(wildcard obj/*.o) $(wildcard lib/bin/*.a); else $(CC) -shared $(LDFLAGS) -o'out/libshttp2.so' $(wildcard obj/*.o) $(wildcard lib/bin/*.a); fi
 	$(OBJCOPY) --only-keep-debug 'out/libshttp2.so' 'out/libshttp2.so.dbg'
 	chmod -x out/libshttp2.so*
@@ -25,4 +25,7 @@ out:
 obj:
 	$(MKDIR) obj
 
-.PHONY: clean all
+compiledb: clean
+	bear -- $(MAKE)
+
+.PHONY: clean all compiledb
