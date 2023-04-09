@@ -4,7 +4,7 @@
 #include <stddef.h>
 
 typedef enum {
-  UNKNOWN_VERSION = -1,
+  HTTP_UNKNOWN_VERSION = -1,
 
   HTTP_0_9,
   HTTP_ONELINE = HTTP_0_9,
