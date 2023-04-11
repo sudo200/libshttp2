@@ -4,6 +4,10 @@
 #include <sutil/types.h>
 
 typedef struct http_header http_header_t;
+typedef struct {
+  const char *key;
+  const char *value;
+} http_header_entry_t;
 
 #define NONNULL(...)  __attribute__((nonnull(__VA_ARGS__)))
 
@@ -16,7 +20,7 @@ http_header_t *http_header_new(void);
  * Creates a http header from a NULL-terminated array of string pairs,
  * headers[][0] being the key and headers[][1] being the value.
  */
-http_header_t *http_header_from_strings(const char *const *const headers[2]) NONNULL(1);
+http_header_t *http_header_from_strings(const http_header_entry_t *entries) NONNULL(1);
 
 /**
  * Adds a new entry with given key and value.
