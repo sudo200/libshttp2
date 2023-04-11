@@ -68,7 +68,41 @@ http_header_t *http_header_from_strings(const http_header_entry_t *entries) {
   }
 }
 
+int http_header_add(http_header_t *header, const char *key, const char *value) {
+  const size_t keysz = strlen(key), valuesz = strlen(value);
+  char *_key = NULL, *_value = NULL;
+ 
+  if((_key = ualloc(keysz + sizeof(*_key))) == NULL)
+    goto _error;
 
+  if((_value = ualloc(valuesz + sizeof(*_value))) == NULL)
+    goto _error;
+
+  if(set_add(header->refs, _key, keysz) < 0)
+    goto _error;
+
+  if(set_add(header->refs, _value, valuesz) < 0)
+    goto _error;
+
+  memcpy(_key, key, keysz + sizeof(*_key));
+  memcpy(_value, value, valuesz + sizeof(*_value));
+
+  errno = 0;
+  if(hashmap_put(header->map, _key, keysz, _value) == NULL && errno != 0)
+    goto _error;
+
+  return 0;
+
+_error: {
+    errno_t tmp = errno;
+    set_remove(header->refs, _key, keysz);
+    set_remove(header->refs, _value, valuesz);
+    ufree(_key);
+    ufree(_value);
+    errno = tmp;
+    return -1;
+  }
+}
 
 bool http_header_has(const http_header_t *header, const char *key) {
   return hashmap_contains_key(header->map, stra(key));
@@ -80,14 +114,15 @@ const char *http_header_get(const http_header_t *header, const char *key) {
 
 int http_header_remove(http_header_t *header, const char *key) {
   errno = 0;
-  const char *value = (const char *)hashmap_remove(header->map, stra(key));
+  void *value = hashmap_remove(header->map, stra(key));
   if(value == NULL && errno != 0)
     return -1;
+  void *_key = hashmap_key(header->map, stra(key));
 
   set_remove(header->refs, stra(key));
   set_remove(header->refs, stra(value));
-  //ufree(); TODO: somehow obtain key from hashmap
-  ufree((void *)value);
+  ufree(_key);
+  ufree(value);
   return 0;
 }
 
