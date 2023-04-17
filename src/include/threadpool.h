@@ -9,7 +9,11 @@
 
 typedef struct {
   void (*func)(void *);
-  void *arg;
+  union {
+    long num;
+    const void *cptr;
+    void *ptr;
+  } arg;
 } threadpool_task_t;
 
 typedef struct threadpool threadpool_t;
