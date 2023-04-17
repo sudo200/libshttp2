@@ -7,13 +7,15 @@
 
 #define NONNULL(...)  __attribute__((nonnull(__VA_ARGS__)))
 
+typedef union {
+  long num;
+  const void *cptr;
+  void *ptr;
+} threadpool_task_arg_t;
+
 typedef struct {
-  void (*func)(void *);
-  union {
-    long num;
-    const void *cptr;
-    void *ptr;
-  } arg;
+  void (*func)(threadpool_task_arg_t);
+  threadpool_task_arg_t arg;
 } threadpool_task_t;
 
 typedef struct threadpool threadpool_t;
