@@ -6,13 +6,13 @@
 
 #define LEN(arr)  (sizeof(arr)/sizeof(*arr))
 
-static __attribute__((used)) void task(void *arg __attribute__((unused))) {
+static __attribute__((used)) void task(threadpool_task_arg_t arg) {
   sleep(1);
-  printf("%p: %s\n", arg, (const char *)arg);
+  printf("%p: %s\n", arg.cptr, (const char *)arg.cptr);
 }
 
 int main(void) {
-  static const char *const strs[] __attribute__((used)) = {
+  static const char *const strs[] = {
     "1",
     "2",
     "3",
@@ -31,7 +31,7 @@ int main(void) {
   for(size_t i = 0; i < LEN(strs); i++)
     threadpool.submit(pool, (threadpool_task_t) {
       .func = task,
-      .arg = (void *)strs[i],
+      .arg = { .cptr = (const void *)strs[i] },
     });
 
   sleep(6);
@@ -39,7 +39,7 @@ int main(void) {
   for(size_t i = 0; i < LEN(strs); i++)
     threadpool.submit(pool, (threadpool_task_t) {
       .func = task,
-      .arg = (void *)strs[i]
+      .arg = { .cptr = (const void *)strs[i] } ,
     });
 
   sleep(7);
