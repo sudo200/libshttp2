@@ -53,9 +53,10 @@ const char *http_method_to_string(http_method_t method, size_t *len);
 /**
  * @brief Returns the corresponding enum value for {@arg str}.
  * @param str The string to convert to an enum value.
+ * @param len The length of the string.
  * @returns The corresponding enum value.
  */
-http_method_t http_method_from_string(const char *str);
+http_method_t http_method_from_string(const void *str, size_t len);
 
 #endif  //___METHODS_H___
 
