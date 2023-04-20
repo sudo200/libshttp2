@@ -13,7 +13,7 @@ typedef struct {
   size_t sz;
 } ___str_t;
 
-static hashmap_t *method_map = NULL, *string_map = NULL;
+static hashmap_t *method_map = NULL;
 
 static const http_method_t methods[] = {
   HTTP_ACL,
@@ -89,19 +89,16 @@ static const ___str_t method_strs[] = {
   {"UNSUBSCRIBE", 11},
 };
 
-const char *http_method_to_string(http_method_t method, size_t *len) {
-  const ___str_t *string = (___str_t *)hashmap_get(string_map,
-      &method,
-      sizeof(method)
-  );
-
-  if(string == NULL)
-    return NULL;
-
+static inline const char *from_string_helper(___str_t str, size_t *len) {
   if(len != NULL)
-    *len = string->sz;
+    *len = str.sz;
+  return str.ptr;
+}
 
-  return string->ptr;
+const char *http_method_to_string(http_method_t method, size_t *len) {
+  if(method == HTTP_UNKNOWN_METHOD)
+    return NULL;
+  return from_string_helper(method_strs[(size_t)method], len);
 }
 
 http_method_t http_method_from_string(const void *str, size_t len) {
@@ -115,24 +112,17 @@ http_method_t http_method_from_string(const void *str, size_t len) {
 
 
 static __attribute__((constructor)) void c(void) {
-  if((method_map = hashmap_new(fnv1a)) == NULL ||
-      (string_map = hashmap_new(fnv1a)) == NULL)
+  if((method_map = hashmap_new(fnv1a)) == NULL)
     abort();
 
-  for(size_t i = 0; i < len(methods); i++) {
+  for(size_t i = 0; i < len(methods); i++)
     hashmap_put(method_map,
         (void *)method_strs[i].ptr,
         method_strs[i].sz,
         (void *)(methods + i));
-    hashmap_put(string_map,
-        (void *)(methods + i),
-        sizeof(*methods),
-        (void *)(method_strs + i));
-  }
 }
 
 static __attribute__((destructor)) void d(void) {
   hashmap_destroy(method_map);
-  hashmap_destroy(string_map);
 }
 
