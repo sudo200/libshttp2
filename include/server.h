@@ -21,16 +21,19 @@ typedef struct {
 typedef void (*http_server_handler_t)(const http_request_t *req, const http_server_handler_methods_t *res);
 typedef struct http_server http_server_t;
 
+typedef struct {
+http_server_t *(*init)(http_server_handler_t handler, server_type_t type, size_t workers) NONNULL(1);
 
-http_server_t *http_server_new(http_server_handler_t handler, server_type_t type) NONNULL(1);
+int (*add_bind)(http_server_t *server, sockaddr_t addr) NONNULL(1);
 
-int http_server_add_bind(http_server_t *server, sockaddr_t addr, int backlog) NONNULL(1);
+int (*start)(http_server_t *server) NONNULL(1);
 
-int http_server_start(http_server_t *server, param_cb_t cb, callback_param_t param) NONNULL(1);
+int (*stop)(http_server_t *server) NONNULL(1);
 
-int http_server_stop(http_server_t *server, param_cb_t cb, callback_param_t param) NONNULL(1);
+void (*destroy)(http_server_t *server);
+} http_server_methods_t;
 
-void http_server_destroy(http_server_t *server);
+extern const http_server_methods_t http_server;
 
 #undef NONNULL
 
